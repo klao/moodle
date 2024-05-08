@@ -157,6 +157,18 @@ class qtype_ordering_question extends question_graded_automatically {
         $this->correctresponse = array_filter(explode(',', $step->get_qt_var('_correctresponse')));
     }
 
+    /**
+     * Returns the answer md5 keys of a question as an ordered, comma separated string, suitable for comparison.
+     *
+     * @param question_definition $question
+     * @return string
+     */
+    public static function answer_md5key_set($question): string {
+        $answerkeys = array_map(fn ($x) => $x->md5key, $question->answers);
+        sort($answerkeys);
+        return implode(',', $answerkeys);
+    }
+
     public function validate_can_regrade_with_other_version(question_definition $otherversion): ?string {
         $basemessage = parent::validate_can_regrade_with_other_version($otherversion);
         if ($basemessage) {
@@ -165,6 +177,10 @@ class qtype_ordering_question extends question_graded_automatically {
 
         if (count($this->answers) != count($otherversion->answers)) {
             return get_string('regradeissuenumitemschanged', 'qtype_ordering');
+        }
+
+        if (self::answer_md5key_set($this) != self::answer_md5key_set($otherversion)) {
+            return get_string('regradeissuesetitemschanged', 'qtype_ordering');
         }
 
         return null;

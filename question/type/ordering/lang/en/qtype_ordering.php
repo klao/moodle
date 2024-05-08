@@ -112,6 +112,7 @@ $string['privacy:preference:selecttype'] = 'selecttype.';
 $string['privacy:preference:showgrading'] = 'showgrading.';
 
 $string['regradeissuenumitemschanged'] = 'The number of draggable items has changed.';
+$string['regradeissuesetitemschanged'] = 'The set of draggable items has changed.';
 $string['relativeallpreviousandnext'] = 'Relative to ALL the previous and next items';
 $string['relativenextexcludelast'] = 'Relative to the next item (excluding last)';
 $string['relativenextincludelast'] = 'Relative to the next item (including last)';
