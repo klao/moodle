@@ -692,7 +692,7 @@ final class question_test extends \advanced_testcase {
         $this->assertEquals([2, 4, 0], $numparts);
     }
 
-    public function test_validate_can_regrade_with_other_version_bad(): void {
+    public function test_validate_can_regrade_with_other_version_bad_number(): void {
         if (!method_exists('question_definition', 'validate_can_regrade_with_other_version')) {
             $this->markTestSkipped('This test only applies to Moodle 4.x');
         }
@@ -715,6 +715,30 @@ final class question_test extends \advanced_testcase {
         );
     }
 
+    public function test_validate_can_regrade_with_other_version_bad_set(): void {
+        if (!method_exists('question_definition', 'validate_can_regrade_with_other_version')) {
+            $this->markTestSkipped('This test only applies to Moodle 4.x');
+        }
+
+        $question = test_question_maker::make_question('ordering');
+
+        $newq = clone($question);
+        $helper = new \qtype_ordering_test_helper();
+        $newq->answers = [
+            23 => $helper->make_answer(23, 'One', FORMAT_HTML, 1, true),
+            24 => $helper->make_answer(24, 'Two', FORMAT_HTML, 2, true),
+            25 => $helper->make_answer(25, 'Three', FORMAT_HTML, 3, true),
+            26 => $helper->make_answer(26, 'Four', FORMAT_HTML, 4, true),
+            27 => $helper->make_answer(27, 'Five', FORMAT_HTML, 5, true),
+            28 => $helper->make_answer(28, 'Six', FORMAT_HTML, 6, true),
+        ];
+
+        $this->assertEquals(
+            get_string('regradeissuesetitemschanged', 'qtype_ordering'),
+            $newq->validate_can_regrade_with_other_version($question)
+        );
+    }
+
     public function test_validate_can_regrade_with_other_version_ok(): void {
         if (!method_exists('question_definition', 'validate_can_regrade_with_other_version')) {
             $this->markTestSkipped('This test only applies to Moodle 4.x');
@@ -729,8 +753,9 @@ final class question_test extends \advanced_testcase {
             24 => $helper->make_answer(24, 'Object', FORMAT_HTML, 2, true),
             25 => $helper->make_answer(25, 'Oriented', FORMAT_HTML, 3, true),
             26 => $helper->make_answer(26, 'Dynamic', FORMAT_HTML, 4, true),
-            27 => $helper->make_answer(27, 'Learning', FORMAT_HTML, 5, true),
-            28 => $helper->make_answer(28, 'Environment', FORMAT_HTML, 6, true),
+            // The order of the items can change, it's ok.
+            27 => $helper->make_answer(27, 'Environment', FORMAT_HTML, 5, true),
+            28 => $helper->make_answer(28, 'Learning', FORMAT_HTML, 6, true),
         ];
 
         $this->assertNull($newq->validate_can_regrade_with_other_version($question));
