@@ -444,20 +444,36 @@ class qtype_ordering_question extends question_graded_automatically {
      * @param array $response Form data
      */
     public function update_current_response(array $response) {
-        $name = $this->get_response_fieldname();
-        if (array_key_exists($name, $response)) {
-            $ids = explode(',', $response[$name]);
-            foreach ($ids as $i => $id) {
-                foreach ($this->answers as $answer) {
-                    if ($id == $answer->md5key) {
-                        $ids[$i] = $answer->id;
-                        break;
-                    }
+        $fieldname = $this->get_response_fieldname();
+        if (!array_key_exists($fieldname, $response)) {
+            // Use the latest version if the current version is not found.
+            $responsekeys = array_filter(array_keys($response), fn ($x) => str_starts_with($x, 'response_'));
+            if (empty($responsekeys)) {
+                // This is a response in progress, do nothing.
+                return;
+            }
+            $fieldname = end($responsekeys);
+
+            // Check that this version is compatible with the current question.
+            $ids = explode(',', $response[$fieldname]);
+            sort($ids);
+            if (implode(',', $ids) != self::answer_md5key_set($this)) {
+                // This shouldn't happen because we check for compatibility before attempting to regrade.
+                throw new coding_exception('Response is not compatible with the current question.');
+            }
+        }
+
+        $ids = explode(',', $response[$fieldname]);
+        foreach ($ids as $i => $id) {
+            foreach ($this->answers as $answer) {
+                if ($id == $answer->md5key) {
+                    $ids[$i] = $answer->id;
+                    break;
                 }
             }
-            // Note: TH mentions that this is a bit of a hack.
-            $this->currentresponse = $ids;
         }
+        // Note: TH mentions that this is a bit of a hack.
+        $this->currentresponse = $ids;
     }
 
     /**
